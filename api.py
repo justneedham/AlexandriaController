@@ -2,6 +2,7 @@ import untangle
 import requests
 import pandas
 from decimal import Decimal
+from model import WebDriver
 
 pandas.set_option('display.height', 1000)
 pandas.set_option('display.max_rows', 500)
@@ -52,8 +53,6 @@ class API(object):
             print('Median', sellmed)
             print('Deviation', sellstd)
 
-
-
             print('-'*10, 'Buy Data', '-'*10, '\n')
             print(buyDataFrame, '\n')
 
@@ -68,6 +67,13 @@ class API(object):
             print('Min:', buymin)
             print('Median:', buymed)
             print('Deviation', buystd)
+
+    def hit_amazon(self):
+        driver = WebDriver()
+        driver.go_to('https://www.amazon.com/gp/offer-listing/B074SF5R1F/ref=tmm_pap_used_olp_sr?ie=UTF8&condition=used&qid=1515387653&sr=8-1')
+        print(driver.driver.page_source)
+
+
 
     def call_api(self, isbn, url):
         """Makes a request to the api"""
@@ -137,7 +143,7 @@ class Row(object):
         self.condition = condition
 
 api = API()
-api.search_isbn(['9780738084787'])
+api.hit_amazon()
 
 
 
