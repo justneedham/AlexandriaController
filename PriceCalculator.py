@@ -1,3 +1,5 @@
+# Copyright Alexandria Books All Rights Reserved
+
 from decimal import Decimal
 
 class PriceCalulator(object):
