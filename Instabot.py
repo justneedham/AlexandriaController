@@ -4,7 +4,7 @@ from WebDriver import WebDriver
 from bs4 import BeautifulSoup
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import random, re, os, time, smtplib, datetime, caffeine
+import random, re, os, time, smtplib, datetime, caffeine, fnmatch
 
 class InstaBot(object):
 
@@ -178,19 +178,23 @@ class InstaBot(object):
 
     def get_last_followers(self):
         """Loads the last followers from lastFollowersData.txt and returns list"""
-        lastFollowers = []
-        with open('lastFollowersData.txt') as file:
-            line = file.readline()
-            line.strip()
-            cleanLine = re.sub(r'\n', '', line)
-            lastFollowers.append(cleanLine)
-            while line:
-                line = file.readline()
-                line.strip()
-                cleanLine = re.sub(r'\n', '', line)
-                lastFollowers.append(cleanLine)
-        lastFollowers.pop()
-        return lastFollowers
+        # lastFollowers = []
+        # with open('lastFollowersData.txt') as file:
+        #     line = file.readline()
+        #     line.strip()
+        #     cleanLine = re.sub(r'\n', '', line)
+        #     lastFollowers.append(cleanLine)
+        #     while line:
+        #         line = file.readline()
+        #         line.strip()
+        #         cleanLine = re.sub(r'\n', '', line)
+        #         lastFollowers.append(cleanLine)
+        # lastFollowers.pop()
+        # return lastFollowers
+        for file in os.listdir('.'):
+            if fnmatch.fnmatch(file, '*.txt'):
+                print(file)
+                print("FILES FOUND")
 
     def compare_activity_data(self):
         """Reads the new activity data and compares it with the old and returns the likes"""
@@ -216,6 +220,15 @@ class InstaBot(object):
 
         self.save_activity_data(currentActivityData['all'])
         self.save_follower_data(self.followers)
+
+    def find_in_path(self, file_name):
+        path = os.environ['PATH']
+
+        for d in path.split(os.pathsep):
+            file_path = os.path.abspath(os.path.join(d, file_name))
+            if os.path.exists(file_path):
+                return file_path
+            return file_name
 
     def get_last_activity_data(self):
         """Returns a dictionary"""
@@ -635,7 +648,20 @@ class InstaBot(object):
         msg.attach(MIMEText(message, 'plain'))
         s.send_message(msg)
 
+try:
+    bot = InstaBot(5, 10, 0)
+    bot.run()
+except:
+    s = smtplib.SMTP(host='smtp.gmail.com', port='587')
+    s.starttls()
+    s.login('justin.needham@alumnimail.pepperdine.edu', 'DeoJuvante9!')
+    msg = MIMEMultipart()
+    msg['FROM'] = 'Instabot'
+    msg['To'] = 'info@alexandriatextbooks.com'
+    msg['Subject'] = 'CRITICAL ERROR'
 
-
-bot = InstaBot(10, 35, 0)
-bot.run()
+    message = """
+    Instabot crashed and was unable to complete the script
+    """
+    msg.attach(MIMEText(message, 'plain'))
+    s.send_message(msg)
