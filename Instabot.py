@@ -11,8 +11,8 @@ class InstaBot(object):
     def __init__(self, peopleToFollow, postsToLike, peopleToUnfollow):
         self.driver = WebDriver()
         self.url = 'https://www.instagram.com/?hl=en'
-        self.username = "alexandriatextbooks"
-        self.password = "Al3xandr1a!!!"
+        self.username = "USERNAME"
+        self.password = "PASSWORD"
         self.longPause = [4.0, 3.5, 3.0, 2.5, 2.0]
         self.shortPause = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]
         self.peopleToFollow = peopleToFollow
