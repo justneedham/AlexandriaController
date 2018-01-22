@@ -635,8 +635,7 @@ class InstaBot(object):
         msg.attach(MIMEText(message, 'plain'))
         s.send_message(msg)
 
-def masterTest():
-    bot = InstaBot(peopleToFollow=1, postsToLike=6, peopleToUnfollow=0)
-    bot.run()
 
-masterTest()
+
+bot = InstaBot(10, 35, 0)
+bot.run()
