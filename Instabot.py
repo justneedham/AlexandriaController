@@ -4,7 +4,7 @@ from WebDriver import WebDriver
 from bs4 import BeautifulSoup
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import random, re, os, time, smtplib, datetime, caffeine, fnmatch
+import random, re, os, time, smtplib, datetime, caffeine
 
 class InstaBot(object):
 
@@ -178,23 +178,19 @@ class InstaBot(object):
 
     def get_last_followers(self):
         """Loads the last followers from lastFollowersData.txt and returns list"""
-        # lastFollowers = []
-        # with open('lastFollowersData.txt') as file:
-        #     line = file.readline()
-        #     line.strip()
-        #     cleanLine = re.sub(r'\n', '', line)
-        #     lastFollowers.append(cleanLine)
-        #     while line:
-        #         line = file.readline()
-        #         line.strip()
-        #         cleanLine = re.sub(r'\n', '', line)
-        #         lastFollowers.append(cleanLine)
-        # lastFollowers.pop()
-        # return lastFollowers
-        for file in os.listdir('.'):
-            if fnmatch.fnmatch(file, '*.txt'):
-                print(file)
-                print("FILES FOUND")
+        lastFollowers = []
+        with open('lastFollowersData.txt') as file:
+            line = file.readline()
+            line.strip()
+            cleanLine = re.sub(r'\n', '', line)
+            lastFollowers.append(cleanLine)
+            while line:
+                line = file.readline()
+                line.strip()
+                cleanLine = re.sub(r'\n', '', line)
+                lastFollowers.append(cleanLine)
+        lastFollowers.pop()
+        return lastFollowers
 
     def compare_activity_data(self):
         """Reads the new activity data and compares it with the old and returns the likes"""
