@@ -596,7 +596,7 @@ class InstaBot(object):
         """Sends email with session statistics"""
         s = smtplib.SMTP(host='smtp.gmail.com', port='587')
         s.starttls()
-        s.login('justin.needham@alumnimail.pepperdine.edu', 'DeoJuvante9!')
+        s.login('EMAILADDRESS', 'PASSWORD')
 
         now = datetime.datetime.now()
         date = "{} {} {}".format(now.month, now.day, now.year)
