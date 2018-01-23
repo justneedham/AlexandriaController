@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random, re, os, time, smtplib, datetime, caffeine
+import mysql.connector
+from mysql.connector import Error
 
 class InstaBot(object):
 
@@ -33,9 +35,12 @@ class InstaBot(object):
         self.set_up()
 
         self.follow_routine()
+        self.pause(self.longPause)
         if self.peopleToUnfollow != 0:
             self.unfollow_routine()
+            self.pause(self.longPause)
         self.like_routine()
+        self.pause(self.longPause)
 
         self.tear_down()
 
@@ -56,11 +61,11 @@ class InstaBot(object):
         self.click_exit_btn()
         self.click_instagram_home_btn()
         postsToLike = self.postsToLike - self.sucessfullyLiked
-        x = 0
-        while x < postsToLike:
+        liked = 0
+        while liked < postsToLike:
             try:
                 try:
-                    x += 1
+                    liked += 1
                     likeBtn = self.driver.get_element_by_xpath("//span[@class='_8scx2 coreSpriteHeartOpen']")
                     self.driver.click_button(likeBtn)
                     self.sucessfullyLiked += 1
@@ -81,40 +86,41 @@ class InstaBot(object):
             randomFollower = random.choice(self.followers)
             self.got_to_follower_page(randomFollower)
             randomFollowerFollowers = self.get_followers(randomFollower)
-        except:
-            self.follow_routine()
-
-        x = 0
-        while x <= self.peopleToFollow:
-            self.got_to_follower_page(random.choice(randomFollowerFollowers))
-
-            try:
-                x += 1
-                self.click_follow_btn()
-                self.sucessfullyFollowed += 1
-            except:
-                self.followError += 1
-
-            try:
-                self.click_post("1")
+            followed = 0
+            while followed < self.peopleToFollow:
+                self.got_to_follower_page(random.choice(randomFollowerFollowers))
+                self.pause(self.shortPause)
                 try:
-                    self.click_like_btn()
-                    self.click_exit_btn()
-                    self.sucessfullyLiked += 1
+                    self.click_follow_btn()
+                    self.sucessfullyFollowed += 1
+                    followed += 1
                 except:
-                    self.likeError += 1
-            except:
-                self.privateAccountsFollowed += 1
+                    self.followError += 1
+                try:
+                    self.click_post("1")
+                    try:
+                        self.click_like_btn()
+                        self.click_exit_btn()
+                        self.sucessfullyLiked += 1
+                    except:
+                        self.likeError += 1
+                except:
+                    self.privateAccountsFollowed += 1
+            self.pause(self.longPause)
+        except:
+            self.errorLog.append("Follow Routine Error")
+            self.follow_routine()
 
     def tear_down(self):
         """Analyze session performance"""
         self.endTime = time.time()
         self.elapsedTime = self.endTime - self.startTime
         print('-------------- Recent Activity --------------')
+        print('Current Followers: {}'.format(self.numberOfFollowers))
+        print('Current Following: {}'.format(self.numberOfFollowing))
         print('Followers Lost: {}'.format(self.followersLost))
         print('Followers Gained: {}'.format(self.followersGained))
         print('Followers Retained: {}'.format(self.followersRetained))
-        print('Total Followers: {}'.format(self.numberOfFollowers))
         print('Net Change: {}'.format(self.netChange))
         print('New Likes: {}'.format(self.newLikes))
         print('\n')
@@ -127,7 +133,9 @@ class InstaBot(object):
         print('Follow errors: {}'.format(self.followError))
         print('Unfollow errors: {}'.format(self.unfollowError))
         print('Script Time: {} seconds'.format(round(self.elapsedTime),2))
+        print('Number of Errors: {}'.format(len(self.errorLog)))
         self.send_email()
+        self.log_to_datawarehouse()
         self.driver.close()
 
     def unfollow_routine(self):
@@ -168,10 +176,6 @@ class InstaBot(object):
         self.click_following_btn()
         self.scroll_following(numberOfFollowing)
         following = self.read_following()
-
-        if len(following) == 0:
-            self.driver.refresh()
-            self.get_following(username)
 
         self.click_exit_btn()
         return following
@@ -221,6 +225,7 @@ class InstaBot(object):
 
         self.save_activity_data(currentActivityData['all'])
         self.save_follower_data(self.followers)
+        self.driver.refresh()
 
     def get_last_activity_data(self):
         """Returns a dictionary"""
@@ -344,10 +349,6 @@ class InstaBot(object):
         self.click_followers_btn(username)
         self.scroll_followers(numberOfFollowers)
         followers = self.read_followers()
-
-        if len(followers) == 0:
-            self.driver.refresh()
-            self.get_followers(username)
 
         self.click_exit_btn()
         return followers
@@ -542,6 +543,7 @@ class InstaBot(object):
         try:
             likeBtn = self.driver.get_element_by_xpath("//span[@class='_8scx2 coreSpriteHeartOpen']")
             self.driver.click_button(likeBtn)
+            self.pause(self.shortPause)
         except:
             self.likeError += 1
 
@@ -561,12 +563,17 @@ class InstaBot(object):
         self.driver.click_button(unfollowBtn)
         self.pause(self.longPause)
 
-
     def click_profile_btn(self):
         """Click on the profile button"""
-        profileBtn = self.driver.get_element_by_xpath("//a[@href='/alexandriatextbooks/']")
-        self.driver.click_button(profileBtn)
-        self.pause(self.longPause)
+        try:
+            profileBtn = self.driver.get_element_by_xpath("//a[@href='/alexandriatextbooks/']")
+            self.driver.click_button(profileBtn)
+            self.pause(self.longPause)
+        except:
+            self.errorLog.append("Unable to click profile button")
+            self.driver.driver.back()
+            self.driver.refresh()
+            self.click_profile_btn()
 
     def click_instagram_home_btn(self):
         """Click on the home button to view feed"""
@@ -645,8 +652,57 @@ class InstaBot(object):
         msg.attach(MIMEText(message, 'plain'))
         s.send_message(msg)
 
+    def log_to_datawarehouse(self):
+        """Connects to the data warehouse and inserts session data"""
+        connection = self.connect()
+        cur = connection.cursor()
+        cur.callproc('insert_instabot_data', [self.numberOfCurrentFollowers, self.numberOfFollowing,
+                                              self.followersLost, self.followersRetained,
+                                              self.followersGained, self.newLikes,
+                                              self.sucessfullyLiked, self.sucessfullyFollowed,
+                                              self.successfullyUnfollowed, self.likeError,
+                                              self.followError, self.unfollowError,
+                                              round(self.elapsedTime)])
+
+        connection.commit()
+
+    def connect(self):
+        """Connects to the datawarehouse and inserts session data"""
+        try:
+            connection = mysql.connector.connect(
+                host='35.197.44.156',
+                database='alexandria_data_warehouse',
+                user='Justin Needham',
+                password='DeoJuvante',
+            )
+            if connection.is_connected():
+                return connection
+        except Error as e:
+            self.errorLog.append(e)
+
+def test_follow():
+    """Follows two people"""
+    bot = InstaBot(2, 2, 0)
+    bot.set_up()
+    bot.follow_routine()
+    bot.driver.close()
+
+def test_like():
+    """Likes photos"""
+    bot = InstaBot(0, 5, 0)
+    bot.set_up()
+    bot.like_routine()
+    bot.driver.close()
+
+def test_unfollow():
+    """Unfollows"""
+    bot = InstaBot(0, 2, 2)
+    bot.set_up()
+    bot.unfollow_routine()
+    bot.driver.close()
+
 try:
-    bot = InstaBot(5, 10, 0)
+    bot = InstaBot(50, 275, 25)
     bot.run()
 except:
     s = smtplib.SMTP(host='smtp.gmail.com', port='587')
@@ -662,3 +718,4 @@ except:
     """
     msg.attach(MIMEText(message, 'plain'))
     s.send_message(msg)
+
