@@ -93,6 +93,9 @@ class WebDriver(object):
     def scroll_main_window(self, pixels):
         self.driver.execute_script('window.scrollBy(0,'+pixels+')', '')
 
+    def refresh(self):
+        self.driver.refresh()
+
 
 
 
