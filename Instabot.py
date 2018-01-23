@@ -168,6 +168,11 @@ class InstaBot(object):
         self.click_following_btn()
         self.scroll_following(numberOfFollowing)
         following = self.read_following()
+
+        if len(following) == 0:
+            self.driver.refresh()
+            self.get_following(username)
+
         self.click_exit_btn()
         return following
 
@@ -216,15 +221,6 @@ class InstaBot(object):
 
         self.save_activity_data(currentActivityData['all'])
         self.save_follower_data(self.followers)
-
-    def find_in_path(self, file_name):
-        path = os.environ['PATH']
-
-        for d in path.split(os.pathsep):
-            file_path = os.path.abspath(os.path.join(d, file_name))
-            if os.path.exists(file_path):
-                return file_path
-            return file_name
 
     def get_last_activity_data(self):
         """Returns a dictionary"""
@@ -348,6 +344,11 @@ class InstaBot(object):
         self.click_followers_btn(username)
         self.scroll_followers(numberOfFollowers)
         followers = self.read_followers()
+
+        if len(followers) == 0:
+            self.driver.refresh()
+            self.get_followers(username)
+
         self.click_exit_btn()
         return followers
 
