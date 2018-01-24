@@ -1,4 +1,4 @@
-# Copyright Alexandria Books All Rights Reserved
+#Copyright Alexandria Books All Rights Reserved
 
 from decimal import Decimal
 
@@ -9,7 +9,6 @@ class PriceCalulator(object):
         self.variableClosingFee = 1.35
         self.fixedClosingFee = 0.99
         self.referralFeePercentage = 0.15
-        self.run()
 
     def run(self):
         """Main loop for the calculator"""
@@ -55,4 +54,5 @@ class PriceCalulator(object):
         print('         Profit:', profit)
         print('Suggested Price:', suggestedPrice)
 
-calculator = PriceCalulator()
+app = PriceCalulator()
+app.run()
