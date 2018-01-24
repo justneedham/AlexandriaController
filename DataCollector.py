@@ -38,7 +38,7 @@ class DataController(object):
         Script Time: {} seconds
         """.format(self.api.APICalls, self.database.numberOfISBNs, self.datawarehouse.rowsCommited, self.elapsedTime)
 
-        self.emailDriver.send_message(report, 'Data Collection', 'info@alexandriatextbooks.com')
+        self.emailDriver.send_message(report, 'Databot', 'info@alexandriatextbooks.com')
 
 app = DataController()
 app.run()
