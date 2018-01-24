@@ -4,7 +4,7 @@ from WebDriver import WebDriver
 from bs4 import BeautifulSoup
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import random, re, os, time, smtplib, datetime, caffeine
+import random, re, os, time, smtplib, caffeine
 import mysql.connector
 from mysql.connector import Error
 
@@ -613,14 +613,12 @@ class InstaBot(object):
         """Sends email with session statistics"""
         s = smtplib.SMTP(host='smtp.gmail.com', port='587')
         s.starttls()
-        s.login('justin.needham@alumnimail.pepperdine.edu', 'DeoJuvante9!')
+        s.login('alexandriatextbooksassistant@gmail.com', 'teXtbooks@l3x')
 
-        now = datetime.datetime.now()
-        date = "{} {} {}".format(now.month, now.day, now.year)
         msg = MIMEMultipart()
         msg['From'] = 'Instabot'
         msg['To'] = 'info@alexandriatextbooks.com'
-        msg['Subject'] = 'Performance Report: {}'.format(date)
+        msg['Subject'] = 'Instabot'
 
         message = """
         Recent Activity
@@ -707,7 +705,7 @@ try:
 except:
     s = smtplib.SMTP(host='smtp.gmail.com', port='587')
     s.starttls()
-    s.login('justin.needham@alumnimail.pepperdine.edu', 'DeoJuvante9!')
+    s.login('alexandriatextbooksassistant@gmail.com', 'teXtbooks@l3x')
     msg = MIMEMultipart()
     msg['FROM'] = 'Instabot'
     msg['To'] = 'info@alexandriatextbooks.com'
