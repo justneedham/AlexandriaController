@@ -3,9 +3,7 @@
 from WebDriver import WebDriver
 from EmailDriver import EmailDriver
 from bs4 import BeautifulSoup
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import random, re, os, time, smtplib, caffeine
+import random, re, os, time, caffeine
 import mysql.connector
 from mysql.connector import Error
 
