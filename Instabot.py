@@ -1,12 +1,15 @@
 #Copyright Alexandria Books All Rights Reserved
 
 from WebDriver import WebDriver
+from EmailDriver import EmailDriver
 from bs4 import BeautifulSoup
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random, re, os, time, smtplib, caffeine
 import mysql.connector
 from mysql.connector import Error
+
+emailServer = EmailDriver('smtp.gmail.com', '587', 'alexandriatextbooksassistant@gmail.com', 'teXtbooks@l3x')
 
 class InstaBot(object):
 
@@ -60,25 +63,19 @@ class InstaBot(object):
         """Scroll instagram feed to look at next post"""
         self.click_exit_btn()
         self.click_instagram_home_btn()
-        postsToLike = self.postsToLike - self.sucessfullyLiked
+
         liked = 0
-        while liked < postsToLike:
-            try:
-                try:
-                    liked += 1
-                    likeBtn = self.driver.get_element_by_xpath("//span[@class='_8scx2 coreSpriteHeartOpen']")
-                    self.driver.click_button(likeBtn)
-                    self.sucessfullyLiked += 1
-                except:
-                    try:
-                        unlikeBtn = self.driver.get_element_by_xpath("//span[@class='_8scx2 coreSpriteHeartFull']")
-                        self.driver.scroll_main_window('400')
-                        self.likeError += 1
-                    except:
-                        self.driver.scroll_main_window('400')
-                        self.pause(self.longPause)
-            except:
-                self.scrollError += 1
+        while liked <= self.postsToLike:
+
+            likeBtn = self.driver.get_element_by_xpath("//span[@class='_8scx2 coreSpriteHeartOpen']")
+
+            if likeBtn != None:
+                self.driver.click_button(likeBtn)
+                self.sucessfullyLiked += 1
+                liked += 1
+            else:
+                self.driver.scroll_main_window('400')
+                self.pause(self.longPause)
 
     def follow_routine(self):
         """Follows random people"""
@@ -290,17 +287,26 @@ class InstaBot(object):
         for item in bannedItems:
             self.removeItem(item, liTagsTxt)
 
-        ### Skips the first three items
+        ### Skips the first three items ###
         for item in liTagsTxt[3:]:
             cleanList.append(item)
         cleanCurrentActivityData = []
+
+        cleanListOfList = []
+        self.show(cleanList)
         for item in cleanList:
             result = item.split(' ')
-            username = result[0]
-            activity = result[1]
-            timeList = result[3].split('.')[1]
-            time = re.sub(r'Following|Follow', '', timeList)
-            cleanCurrentActivityData.append([username, activity, time])
+            cleanListOfList.append(result)
+
+        self.show(cleanListOfList)
+        ### Checks to see if remaining data is clean ###
+        for list in cleanListOfList:
+            if len(list) == 4:
+                username = list[0]
+                activity = list[1]
+                timeList = list[3].split('.')[1]
+                time = re.sub(r'Following|Follow', '', timeList)
+                cleanCurrentActivityData.append([username, activity, time])
 
         likes = 0
         newFollowers = 0
@@ -611,15 +617,6 @@ class InstaBot(object):
 
     def send_email(self):
         """Sends email with session statistics"""
-        s = smtplib.SMTP(host='smtp.gmail.com', port='587')
-        s.starttls()
-        s.login('alexandriatextbooksassistant@gmail.com', 'teXtbooks@l3x')
-
-        msg = MIMEMultipart()
-        msg['From'] = 'Instabot'
-        msg['To'] = 'info@alexandriatextbooks.com'
-        msg['Subject'] = 'Instabot'
-
         message = """
         Recent Activity
         
@@ -647,8 +644,7 @@ class InstaBot(object):
                    self.likeError, self.followError, self.scrollError, self.unfollowError,
                    round(self.elapsedTime))
 
-        msg.attach(MIMEText(message, 'plain'))
-        s.send_message(msg)
+        emailServer.send_message(message, 'Instabot', 'info@alexandriatextbooks.com')
 
     def log_to_datawarehouse(self):
         """Connects to the data warehouse and inserts session data"""
@@ -687,7 +683,7 @@ def test_follow():
 
 def test_like():
     """Likes photos"""
-    bot = InstaBot(0, 5, 0)
+    bot = InstaBot(0, 10, 0)
     bot.set_up()
     bot.like_routine()
     bot.driver.close()
@@ -700,20 +696,11 @@ def test_unfollow():
     bot.driver.close()
 
 try:
-    bot = InstaBot(50, 275, 25)
+    bot = InstaBot(50, 200, 25)
     bot.run()
 except:
-    s = smtplib.SMTP(host='smtp.gmail.com', port='587')
-    s.starttls()
-    s.login('alexandriatextbooksassistant@gmail.com', 'teXtbooks@l3x')
-    msg = MIMEMultipart()
-    msg['FROM'] = 'Instabot'
-    msg['To'] = 'info@alexandriatextbooks.com'
-    msg['Subject'] = 'CRITICAL ERROR'
-
     message = """
     Instabot crashed and was unable to complete the script
     """
-    msg.attach(MIMEText(message, 'plain'))
-    s.send_message(msg)
+    emailServer.send_message(message, 'Instabot', 'info@alexandriatextbooks.com')
 
