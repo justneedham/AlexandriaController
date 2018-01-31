@@ -5,7 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 import time
 
@@ -13,6 +13,9 @@ class WebDriver(object):
 
     def __init__(self):
         self.driver = webdriver.Chrome('/Users/jarvis/PycharmProjects/OSTK/OSTKF/chromedriver')
+        self.shortPause = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        self.mediumPause = [1, 1.3, 1.5, 1.7, 1.9]
+        self.longPause = [2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]
 
     def get_identifier(self, nameString):
         identifiers = {'ID': By.ID, 'CLASS': By.CLASS_NAME}
@@ -31,7 +34,7 @@ class WebDriver(object):
             element = self.wait().until(EC.presence_of_element_located((identifier, itemString)))
             return element
 
-        except TimeoutException:
+        except NoSuchElementException:
             print(' Unable to find {} identified by {}'.format(itemString, identifierString))
 
     def get_element_by_xpath(self,xpath):
@@ -41,8 +44,8 @@ class WebDriver(object):
             element = self.driver.find_element_by_xpath(xpath)
             return element
 
-        except TimeoutException:
-            print('Unable to find {}'.format(xpath))
+        except NoSuchElementException:
+            return None
 
     def get_button(self, identifierString, itemString):
         identifier = self.get_identifier(identifierString)
