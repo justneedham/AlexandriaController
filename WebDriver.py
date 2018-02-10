@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-import time
+import time, random
 
 class WebDriver(object):
 
@@ -24,8 +24,8 @@ class WebDriver(object):
     def wait(self):
         return WebDriverWait(self.driver, 5)
 
-    def pause(self, seconds=2):
-        time.sleep(seconds)
+    def pause(self, type):
+        time.sleep(random.choice(type))
 
     def get_element(self, identifierString, itemString):
         identifier = self.get_identifier(identifierString)
