@@ -12,10 +12,10 @@ class DatabaseDelegate(object):
         """Connects to the database"""
         try:
             connection = mysql.connector.connect(
-                host='35.197.44.156',
-                database='alexandriabooks',
-                user='Justin Needham',
-                password='DeoJuvante',
+                host='HOST',
+                database='DATABASE',
+                user='USERNAME',
+                password='PASSWORD',
             )
             if connection.is_connected():
                 return connection
@@ -68,10 +68,10 @@ class DataWarehouseDelegate(object):
         """Connects to the data warehouse"""
         try:
             connection = mysql.connector.connect(
-                host='35.197.44.156',
-                database='alexandria_data_warehouse',
-                user='Justin Needham',
-                password='DeoJuvante',
+                host='HOST',
+                database='DATABASE',
+                user='USER',
+                password='PASSWORD',
             )
             if connection.is_connected():
                 return connection
